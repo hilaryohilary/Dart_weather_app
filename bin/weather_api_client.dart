@@ -10,20 +10,23 @@ class WeatherApiClient {
     "base": "https://api.openweathermap.org/data/2.5/",
   };
 
-  Future<Map<String, dynamic>> getLocationId(String city) async {
-    final locationUrl = Uri.parse(
+  Future<Map<String, dynamic>> getFullWeatherDetails(String city) async {
+    final weatherDetailUrl = Uri.parse(
         '${api['base']}/weather?q=$city&units=metric&APPID=${api['key']}');
-    print(locationUrl);
-    final locationResponse = await http.get(locationUrl);
-    if (locationResponse.statusCode != 200) {
-      throw Exception('Error getting locationId for city: $city');
+    print(weatherDetailUrl);
+    final weatherDetailResponse = await http.get(weatherDetailUrl);
+    if (weatherDetailResponse.statusCode != 200) {
+      throw Exception('Error getting weather details for city: $city');
     }
-    final locationJson = jsonDecode(locationResponse.body);
-    return locationJson;
+    final weatherDetailJson = jsonDecode(weatherDetailResponse.body);
+    if (weatherDetailJson == null) {
+      throw Exception('No details found');
+    }
+    return weatherDetailJson;
   }
 
   Future<Weather> fetchWeather(String city) async {
-    final weatherJson = await this.getLocationId(city);
+    final weatherJson = await this.getFullWeatherDetails(city);
     print(weatherJson['sys']['country']);
     return Weather.fromJson(weatherJson);
   }
